@@ -1,58 +1,43 @@
-import React from 'react';
-import Description from './Description/Description';
-import Options from './Options/Options';
-import Feedback from './Feedback/Feedback';
-import Notification from './Notification/Notification';
 import { useEffect, useState } from 'react';
+import ContactForm from './ContactForm/ContactForm';
+import ContactList from './ContactList/ContactList';
+import SearchBox from './SearchBox/SearchBox';
+import contactData from './data/contactData.json';
+import { nanoid } from 'nanoid';
 
 function App() {
-  const [comment, setComment] = useState(() => {
-    if (window.localStorage.getItem('commentStatus')) {
-      const feedbackLocal = window.localStorage.getItem('commentStatus');
-      return JSON.parse(feedbackLocal);
-    }
-    return {
-      good: 0,
-      neutral: 0,
-      bad: 0,
-    };
+  const [userContacts, setUserContacts] = useState(() => {
+    return (
+      JSON.parse(window.localStorage.getItem('contactUser')) ?? contactData
+    );
   });
+  const [searchUser, setSearchUser] = useState('');
 
-  const totalFeedback = comment.good + comment.neutral + comment.bad;
-  const positiveFeedback = Math.round(
-    ((comment.good + comment.neutral) / totalFeedback) * 100
+  const filteredContacts = userContacts.filter(item =>
+    item.name.toLowerCase().includes(searchUser)
   );
 
   useEffect(() => {
-    window.localStorage.setItem('commentStatus', JSON.stringify(comment));
-  }, [comment]);
+    window.localStorage.setItem('contactUser', JSON.stringify(userContacts));
+  }, [userContacts]);
 
-  const updateFeedback = feedbackType =>
-    setComment(prev => ({ ...prev, [feedbackType]: prev[feedbackType] + 1 }));
+  const addContact = ({ values }) => {
+    setUserContacts(prev => [...prev, { id: nanoid(), ...values }]);
+  };
 
-  const resetFeedback = () =>
-    setComment({
-      good: 0,
-      neutral: 0,
-      bad: 0,
-    });
+  const handleDeleteContactUser = id => {
+    setUserContacts(prev => prev.filter(item => item.id !== id));
+  };
 
   return (
     <>
-      <Description />
-      <Options
-        updateFeedback={updateFeedback}
-        totalFeedback={totalFeedback}
-        resetFeedback={resetFeedback}
+      <h1 className='pageTitle'>Phonebook</h1>
+      <ContactForm addContact={addContact} />
+      <SearchBox serchUser={searchUser} setSerchUser={setSearchUser} />
+      <ContactList
+        userContacts={filteredContacts}
+        handleDeleteContactUser={handleDeleteContactUser}
       />
-      {totalFeedback > 0 && (
-        <Feedback
-          comment={comment}
-          totalFeedback={totalFeedback}
-          positiveFeedback={positiveFeedback}
-        />
-      )}
-      {totalFeedback === 0 && <Notification />}
     </>
   );
 }
