@@ -33,7 +33,7 @@ function App() {
     <>
       <h1 className='pageTitle'>Phonebook</h1>
       <ContactForm addContact={addContact} />
-      <SearchBox serchUser={searchUser} setSerchUser={setSearchUser} />
+      <SearchBox searchUser={searchUser} setSearchUser={setSearchUser} />
       <ContactList
         userContacts={filteredContacts}
         handleDeleteContactUser={handleDeleteContactUser}
